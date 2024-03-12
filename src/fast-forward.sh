@@ -24,6 +24,8 @@
 
 set -e
 
+# TODO: set in yml.
+
 # Set to 1 to get some debugging information dumped to stderr.
 case "${DEBUG:-0}" in
     0 | false | FALSE) DEBUG=0;;
@@ -60,6 +62,9 @@ then
         cat $GITHUB_ENV
         echo GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH
         cat $GITHUB_EVENT_PATH
+        echo github_event ↓
+        jq <$GITHUB_EVENT_PATH
+        echo WORKFLOW: $WORKFLOW
     } >&2
 fi
 
@@ -296,6 +301,29 @@ LOG=$(mktemp)
                 git push origin "$PR_SHA:$BASE_REF"
             )
             echo '```'
+            if [ ! -z ${WORKFLOW+x} ]
+            then
+                REPO=$(github_pull_request .base.repo.full_name)
+                TRIGGER_URL="https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW/dispatches"
+                echo "Triggering workflow at $REPO ($BASE_REF) → $TRIGGER_URL"
+                (
+                    PS4='$ '
+                    set -x
+                    curl -L \
+                        -H "Accept: application/vnd.github+json" \
+                        -H "Authorization: Bearer $GITHUB_TOKEN" \
+                        -H "X-GitHub-Api-Version: 2022-11-28" \
+                        https://api.github.com/repos/$REPO/actions/workflows
+                    curl -L \
+                        --show-error \
+                        -X POST \
+                        -H "Accept: application/vnd.github+json" \
+                        -H "Authorization: Bearer $GITHUB_TOKEN" \
+                        -H "X-GitHub-Api-Version: 2022-11-28" \
+                        $TRIGGER_URL \
+                        -d "{\"ref\":\"$BASE_REF\",\"inputs\":{}}"
+                )
+            fi
             echo 0 >$EXIT_CODE
         else
             echo -n "Sorry @$(github_event .sender.login),"
