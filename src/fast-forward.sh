@@ -303,7 +303,7 @@ LOG=$(mktemp)
                 git push origin "$PR_SHA:$BASE_REF"
             )
             echo '```'
-            TRIGGER_URL="https://api.github.com/repos/$(github_event .issue.repository.nameWithOwner)/actions/workflows/$WORKFLOW/dispatches"
+            TRIGGER_URL="https://api.github.com/repos/$(github_event .base.repo.full_name)/actions/workflows/$WORKFLOW/dispatches"
             echo "Triggering workflow: $TRIGGER_URL ($BASE_REF)"
             curl -L \
                 --show-error \
