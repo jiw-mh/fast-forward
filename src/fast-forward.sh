@@ -303,16 +303,21 @@ LOG=$(mktemp)
                 git push origin "$PR_SHA:$BASE_REF"
             )
             echo '```'
-            TRIGGER_URL="https://api.github.com/repos/$(github_event .base.repo.full_name)/actions/workflows/$WORKFLOW/dispatches"
-            echo "Triggering workflow: $TRIGGER_URL ($BASE_REF)"
-            curl -L \
-                --show-error \
-                -X POST \
-                -H "Accept: application/vnd.github+json" \
-                -H "Authorization: Bearer $GITHUB_TOKEN" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                $TRIGGER_URL \
-                -d "{\"ref\":\"$BASE_REF\",\"inputs\":{}}"
+            REPO=$(github_event .base.repo.full_name)
+            TRIGGER_URL="https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW/dispatches"
+            echo "Triggering workflow at $REPO ($BASE_REF) → $TRIGGER_URL"
+            (
+                PS4='$ '
+                set -x
+                curl -L \
+                    --show-error \
+                    -X POST \
+                    -H "Accept: application/vnd.github+json" \
+                    -H "Authorization: Bearer $GITHUB_TOKEN" \
+                    -H "X-GitHub-Api-Version: 2022-11-28" \
+                    $TRIGGER_URL \
+                    -d "{\"ref\":\"$BASE_REF\",\"inputs\":{}}"
+            )
             echo 0 >$EXIT_CODE
         else
             echo -n "Sorry @$(github_event .sender.login),"
