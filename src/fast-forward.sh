@@ -296,12 +296,16 @@ LOG=$(mktemp)
                 git push origin "$PR_SHA:$BASE_REF"
             )
             echo '```'
+            WORKFLOW=workflows/ci.yml
+            TRIGGER_URL="https://api.github.com/repos/$(github_event .issue.repository.nameWithOwner)/actions/workflows/$WORKFLOW/dispatches"
+            echo "Triggering workflow: $TRIGGER_URL ($BASE_REF)"
             curl -L \
+                --show-error \
                 -X POST \
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer $GITHUB_TOKEN" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
-                https://api.github.com/repos/$(github_event .repository.nameWithOwner)/actions/workflows/workflows/ci.yml/dispatches \
+                $TRIGGER_URL \
                 -d "{\"ref\":\"$BASE_REF\",\"inputs\":{}}"
             echo 0 >$EXIT_CODE
         else
