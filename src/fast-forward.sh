@@ -24,6 +24,10 @@
 
 set -e
 
+# TODO: set in yml.
+export DEBUG=1
+export WORKFLOW=workflows/ci.yml
+
 # Set to 1 to get some debugging information dumped to stderr.
 case "${DEBUG:-0}" in
     0 | false | FALSE) DEBUG=0;;
@@ -60,6 +64,9 @@ then
         cat $GITHUB_ENV
         echo GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH
         cat $GITHUB_EVENT_PATH
+        echo github_event ↓
+        jq <$GITHUB_EVENT_PATH
+        echo WORKFLOW: $WORKFLOW
     } >&2
 fi
 
@@ -296,7 +303,6 @@ LOG=$(mktemp)
                 git push origin "$PR_SHA:$BASE_REF"
             )
             echo '```'
-            WORKFLOW=workflows/ci.yml
             TRIGGER_URL="https://api.github.com/repos/$(github_event .issue.repository.nameWithOwner)/actions/workflows/$WORKFLOW/dispatches"
             echo "Triggering workflow: $TRIGGER_URL ($BASE_REF)"
             curl -L \
