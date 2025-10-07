@@ -25,7 +25,7 @@
 set -e
 
 # TODO: set in yml.
-export DEBUG=1
+export DEBUG=0
 export WORKFLOW=workflows/ci.yml
 
 # Set to 1 to get some debugging information dumped to stderr.
