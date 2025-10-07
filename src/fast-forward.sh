@@ -228,6 +228,19 @@ LOG=$(mktemp)
     echo
     echo "Target branch (\`$BASE_REF\`):"
     echo
+
+    if [[ ! -z $KEYWORD ]]; then
+        body=`github_event .comment.body`
+        echo $body
+        if echo $body | grep "${KEYWORD}${BASE_REF}" >/dev/null; then
+            echo "Confirmed correct keyword use."
+        else
+            echo "You need to enter 「${KEYWORD}${BASE_REF}」 to continue"
+            echo 0 >$EXIT_CODE
+            break
+        fi
+    fi
+
     echo '```shell'
     git log --decorate=short -n 1 "$BASE_SHA"
     echo '```'
