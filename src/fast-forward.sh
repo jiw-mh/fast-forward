@@ -102,6 +102,8 @@ function github_event {
     done
 }
 
+cat $GITHUB_EVENT_PATH
+
 # Like github_event, but for the github.event.pull_request context.
 GITHUB_PR=$(mktemp)
 function github_pull_request {
@@ -316,7 +318,7 @@ LOG=$(mktemp)
                 git push origin "$PR_SHA:$BASE_REF"
             )
             echo '```'
-            REPO=$(github_event .base.repo.full_name)
+            REPO=$(github_event .repository.full_name)
             TRIGGER_URL="https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW/dispatches"
             echo "Triggering workflow at $REPO ($BASE_REF) → $TRIGGER_URL"
             (
