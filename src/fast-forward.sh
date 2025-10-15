@@ -26,7 +26,7 @@ set -e
 
 # TODO: set in yml.
 export DEBUG=0
-export WORKFLOW=.github/workflows/ci.yml
+# export WORKFLOW=.github/workflows/ci.yml
 
 # Set to 1 to get some debugging information dumped to stderr.
 case "${DEBUG:-0}" in
